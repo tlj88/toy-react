@@ -98,6 +98,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _toy_react_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toy-react.js */ "./toy-react.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -118,30 +130,24 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
- // function Square(props) {
-//     return (
-//         <button class="square" onClick={props.onClick}>
-//             {props.value}
-//         </button>
-//     );
-// }
+
 
 var Square = /*#__PURE__*/function (_Component) {
   _inherits(Square, _Component);
 
   var _super = _createSuper(Square);
 
-  function Square(props) {
+  function Square() {
     _classCallCheck(this, Square);
 
-    return _super.call(this, props);
+    return _super.apply(this, arguments);
   }
 
   _createClass(Square, [{
     key: "render",
     value: function render() {
       return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("button", {
-        "class": "square",
+        className: "square",
         onClick: this.props.onClick
       }, this.props.value);
     }
@@ -155,53 +161,33 @@ var Board = /*#__PURE__*/function (_Component2) {
 
   var _super2 = _createSuper(Board);
 
-  function Board(props) {
-    var _this;
-
+  function Board() {
     _classCallCheck(this, Board);
 
-    _this = _super2.call(this, props);
-    _this.state = {
-      squares: Array(9).fill(null),
-      xIsNext: true
-    };
-    return _this;
+    return _super2.apply(this, arguments);
   }
 
   _createClass(Board, [{
-    key: "handleClick",
-    value: function handleClick(i) {
-      var squares = this.state.squares.slice();
-      squares[i] = this.state.xIsNext ? 'X' : 'O';
-      this.setState({
-        squares: squares,
-        xIsNext: !this.state.xIsNext
-      });
-    }
-  }, {
     key: "renderSquare",
     value: function renderSquare(i) {
-      var _this2 = this;
+      var _this = this;
 
       return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Square, {
-        value: this.state.squares[i],
+        value: this.props.squares[i],
         onClick: function onClick() {
-          return _this2.handleClick(i);
+          return _this.props.onClick(i);
         }
       });
     }
   }, {
     key: "render",
     value: function render() {
-      var status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
       return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "status"
-      }, status), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "board-row"
+        className: "board-row"
       }, this.renderSquare(0), this.renderSquare(1), this.renderSquare(2)), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "board-row"
+        className: "board-row"
       }, this.renderSquare(3), this.renderSquare(4), this.renderSquare(5)), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "board-row"
+        className: "board-row"
       }, this.renderSquare(6), this.renderSquare(7), this.renderSquare(8)));
     }
   }]);
@@ -214,29 +200,113 @@ var Game = /*#__PURE__*/function (_Component3) {
 
   var _super3 = _createSuper(Game);
 
-  function Game() {
+  function Game(props) {
+    var _this2;
+
     _classCallCheck(this, Game);
 
-    return _super3.apply(this, arguments);
+    _this2 = _super3.call(this, props);
+    _this2.state = {
+      history: [{
+        squares: Array(9).fill(null)
+      }],
+      stepNumber: 0,
+      xIsNext: true
+    };
+    return _this2;
   }
 
   _createClass(Game, [{
+    key: "handleClick",
+    value: function handleClick(i) {
+      var history = this.state.history.slice(0, this.state.stepNumber + 1);
+      var current = history[history.length - 1];
+      var squares = current.squares.slice();
+
+      if (calculateWinner(squares) || squares[i]) {
+        return;
+      }
+
+      squares[i] = this.state.xIsNext ? "X" : "O";
+      this.setState({
+        history: history.concat([{
+          squares: squares
+        }]),
+        stepNumber: history.length,
+        xIsNext: !this.state.xIsNext
+      });
+    }
+  }, {
+    key: "jumpTo",
+    value: function jumpTo(step) {
+      this.setState({
+        stepNumber: step,
+        xIsNext: step % 2 === 0
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
+      var _this3 = this;
+
+      var history = this.state.history;
+      var current = history[this.state.stepNumber];
+      var winner = calculateWinner(current.squares);
+      var moves = history.map(function (step, move) {
+        var desc = move ? 'Go to move #' + move : 'Go to game start';
+        return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("li", {
+          key: move
+        }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("button", {
+          onClick: function onClick() {
+            return _this3.jumpTo(move);
+          }
+        }, desc));
+      });
+      var status;
+
+      if (winner) {
+        status = "Winner: " + winner;
+      } else {
+        status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+      }
+
       return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "game"
+        className: "game"
       }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "game-board"
-      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Board, null)), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "game-info"
-      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("ol", null)));
+        className: "game-board"
+      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Board, {
+        squares: current.squares,
+        onClick: function onClick(i) {
+          return _this3.handleClick(i);
+        }
+      })), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        className: "game-info"
+      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, status), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("ol", null, moves)));
     }
   }]);
 
   return Game;
-}(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+}(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["Component"]); // ========================================
 
-Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["render"])(Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Game, null), document.getElementById('root')); // class MyComponent extends Component {
+
+Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["render"])(Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Game, null), document.getElementById("root"));
+
+function calculateWinner(squares) {
+  var lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+
+  for (var i = 0; i < lines.length; i++) {
+    var _lines$i = _slicedToArray(lines[i], 3),
+        a = _lines$i[0],
+        b = _lines$i[1],
+        c = _lines$i[2];
+
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+
+  return null;
+} // class MyComponent extends Component {
 //     constructor(props) { 
 //         super(props)
 //         this.state = {
@@ -307,6 +377,10 @@ var ElementWrapper = /*#__PURE__*/function () {
           return c.toLocaleLowerCase();
         }), value);
       } else {
+        if (name === 'className') {
+          name = 'class';
+        }
+
         this.root.setAttribute(name, value);
       }
     }
@@ -315,10 +389,14 @@ var ElementWrapper = /*#__PURE__*/function () {
     value: function appendChild(child) {
       // if (child.root) { 
       // this.root.appendChild(child.root)
-      var range = document.createRange();
-      range.setStart(this.root, this.root.childNodes.length);
-      range.setEnd(this.root, this.root.childNodes.length);
-      child[RENDER_TO_DOM](range); // }
+      if (child) {
+        var range = document.createRange();
+        range.setStart(this.root, this.root.childNodes.length);
+        range.setEnd(this.root, this.root.childNodes.length);
+        console.log('child', child);
+        child[RENDER_TO_DOM](range);
+      } // }
+
     }
   }, {
     key: RENDER_TO_DOM,
@@ -380,9 +458,13 @@ var Component = /*#__PURE__*/function () {
   }, {
     key: "rerender",
     value: function rerender() {
-      this._range.deleteContents();
-
-      this[RENDER_TO_DOM](this._range);
+      var oldRange = this._range;
+      var range = document.createRange();
+      range.setStart(oldRange.startContainer, oldRange.startOffset);
+      range.setEnd(oldRange.startContainer, oldRange.startOffset);
+      this[RENDER_TO_DOM](range);
+      oldRange.setStart(range.endContainer, range.endOffset);
+      oldRange.deleteContents();
     }
   }, {
     key: "setState",
@@ -395,7 +477,7 @@ var Component = /*#__PURE__*/function () {
 
       var merge = function merge(oldState, newState) {
         for (var p in newState) {
-          if (oldState[p] === null || _typeof(oldState) !== 'object') {
+          if (oldState[p] === null || _typeof(oldState[p]) !== 'object') {
             oldState[p] = newState[p];
           } else {
             merge(oldState[p], newState[p]);
@@ -418,28 +500,48 @@ var Component = /*#__PURE__*/function () {
   return Component;
 }();
 
-function insertChild(child, parent) {
-  if (_typeof(child) == 'object' && child instanceof Array) {
-    var _iterator = _createForOfIteratorHelper(child),
-        _step;
+function insertChild(children, parent) {
+  // if (
+  //     typeof child == 'object' &&
+  //     child instanceof Array
+  // ) { 
+  //     for (let c of child) { 
+  //         insertChild(c, parent)
+  //     }
+  // }
+  // if (child === null) {
+  //     return
+  // }
+  // if (typeof child === 'string') {
+  //     child = new TextWrapper(child)
+  // }
+  // parent.appendChild(child)
+  var _iterator = _createForOfIteratorHelper(children),
+      _step;
 
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var c = _step.value;
-        insertChild(c, parent);
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var child = _step.value;
+
+      if (typeof child === 'string') {
+        child = new TextWrapper(child);
       }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
+
+      if (child === null) {
+        continue;
+      }
+
+      if (_typeof(child) == 'object' && child instanceof Array) {
+        insertChild(child, parent);
+      } else {
+        parent.appendChild(child);
+      }
     }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
   }
-
-  if (typeof child === 'string') {
-    child = new TextWrapper(child);
-  }
-
-  parent.appendChild(child);
 }
 /**
  * @param {*} type 
@@ -454,7 +556,7 @@ function createElement(type, attributes) {
   if (typeof type === 'string') {
     e = new ElementWrapper(type);
   } else {
-    e = new type();
+    e = new type(attributes);
   }
 
   if (attributes) {
@@ -462,26 +564,19 @@ function createElement(type, attributes) {
       var value = attributes[key];
       e.setAttribute(key, value);
     }
-  }
+  } // if (children) {
+  //     for (let child of children) {
+  //         insertChild(child, e)          
+  //     }
+  // }
+
 
   for (var _len = arguments.length, children = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
     children[_key - 2] = arguments[_key];
   }
 
   if (children) {
-    var _iterator2 = _createForOfIteratorHelper(children),
-        _step2;
-
-    try {
-      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-        var child = _step2.value;
-        insertChild(child, e);
-      }
-    } catch (err) {
-      _iterator2.e(err);
-    } finally {
-      _iterator2.f();
-    }
+    insertChild(children, e);
   }
 
   return e;

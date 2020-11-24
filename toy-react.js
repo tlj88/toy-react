@@ -12,16 +12,23 @@ class ElementWrapper {
             // RegExp.$1
             this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLocaleLowerCase()), value)
         } else { 
+            if (name === 'className') {
+                name = 'class'
+            }
             this.root.setAttribute(name, value)
         }
     }
     appendChild(child) { 
         // if (child.root) { 
             // this.root.appendChild(child.root)
-            let range = document.createRange()
-            range.setStart(this.root, this.root.childNodes.length)
-            range.setEnd(this.root, this.root.childNodes.length)
-            child[RENDER_TO_DOM](range)
+            if (child) {
+                let range = document.createRange()
+                range.setStart(this.root, this.root.childNodes.length)
+                range.setEnd(this.root, this.root.childNodes.length)
+                console.log('child', child)
+                child[RENDER_TO_DOM](range)
+            }
+            
         // }
     }
 
@@ -59,9 +66,16 @@ class Component {
         this._range = range
         this.render()[RENDER_TO_DOM](range)
     }
-    rerender() { 
-        this._range.deleteContents()
-        this[RENDER_TO_DOM](this._range)
+    rerender() {
+        let oldRange = this._range 
+
+        let range = document.createRange()
+        range.setStart(oldRange.startContainer, oldRange.startOffset)
+        range.setEnd(oldRange.startContainer, oldRange.startOffset)
+        this[RENDER_TO_DOM](range)
+
+        oldRange.setStart(range.endContainer, range.endOffset)
+        oldRange.deleteContents()
     }
     setState(newState) { 
         if (this.state === null || typeof this.state !== 'object') { 
@@ -71,7 +85,7 @@ class Component {
         }
         let merge = (oldState, newState) => { 
             for (let p in newState) { 
-                if (oldState[p] === null || typeof oldState !== 'object') {
+                if (oldState[p] === null || typeof oldState[p] !== 'object') {
                     oldState[p] = newState[p]
                 } else { 
                     merge(oldState[p], newState[p])
@@ -90,19 +104,37 @@ class Component {
     // }
 }
 
-function insertChild(child, parent) { 
-    if (
-        typeof child == 'object' &&
-        child instanceof Array
-    ) { 
-        for (let c of child) { 
-            insertChild(c, parent)
+function insertChild(children, parent) { 
+    // if (
+    //     typeof child == 'object' &&
+    //     child instanceof Array
+    // ) { 
+    //     for (let c of child) { 
+    //         insertChild(c, parent)
+    //     }
+    // }
+    // if (child === null) {
+    //     return
+    // }
+    // if (typeof child === 'string') {
+    //     child = new TextWrapper(child)
+    // }
+    // parent.appendChild(child)
+    
+    for(let child of children) {
+        if (typeof child === 'string') {
+            child = new TextWrapper(child)
+        }
+        if (child === null) {
+            continue
+        }
+        if (typeof child == 'object' &&
+            child instanceof Array) {
+                insertChild(child, parent)
+        } else {
+            parent.appendChild(child)
         }
     }
-    if (typeof child === 'string') {
-        child = new TextWrapper(child)
-    }
-    parent.appendChild(child)
 }
 
 /**
@@ -115,7 +147,7 @@ function createElement(type, attributes, ...children) {
     if (typeof type === 'string') {
         e = new ElementWrapper(type)
     } else {
-        e = new type()
+        e = new type(attributes)
     }
     if(attributes) {
         for(let key in attributes) {
@@ -123,10 +155,13 @@ function createElement(type, attributes, ...children) {
             e.setAttribute(key, value)
         }
     }
+    // if (children) {
+    //     for (let child of children) {
+    //         insertChild(child, e)          
+    //     }
+    // }
     if (children) {
-        for (let child of children) {
-            insertChild(child, e)          
-        }
+        insertChild(children, e)
     }
     return e
 }
