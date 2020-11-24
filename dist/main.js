@@ -118,36 +118,147 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+ // function Square(props) {
+//     return (
+//         <button class="square" onClick={props.onClick}>
+//             {props.value}
+//         </button>
+//     );
+// }
 
+var Square = /*#__PURE__*/function (_Component) {
+  _inherits(Square, _Component);
 
-var MyComponent = /*#__PURE__*/function (_Component) {
-  _inherits(MyComponent, _Component);
+  var _super = _createSuper(Square);
 
-  var _super = _createSuper(MyComponent);
+  function Square(props) {
+    _classCallCheck(this, Square);
 
-  function MyComponent() {
-    _classCallCheck(this, MyComponent);
-
-    return _super.apply(this, arguments);
+    return _super.call(this, props);
   }
 
-  _createClass(MyComponent, [{
+  _createClass(Square, [{
     key: "render",
     value: function render() {
-      return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
-        "class": "my-component"
-      }, this.children);
+      return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("button", {
+        "class": "square",
+        onClick: this.props.onClick
+      }, this.props.value);
     }
   }]);
 
-  return MyComponent;
-}(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["Component"]); // jsx
+  return Square;
+}(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["Component"]);
 
+var Board = /*#__PURE__*/function (_Component2) {
+  _inherits(Board, _Component2);
 
-Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["render"])(Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(MyComponent, {
-  id: "app",
-  "class": "test"
-}, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, "bjyx"), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null)), document.getElementById('app'));
+  var _super2 = _createSuper(Board);
+
+  function Board(props) {
+    var _this;
+
+    _classCallCheck(this, Board);
+
+    _this = _super2.call(this, props);
+    _this.state = {
+      squares: Array(9).fill(null),
+      xIsNext: true
+    };
+    return _this;
+  }
+
+  _createClass(Board, [{
+    key: "handleClick",
+    value: function handleClick(i) {
+      var squares = this.state.squares.slice();
+      squares[i] = this.state.xIsNext ? 'X' : 'O';
+      this.setState({
+        squares: squares,
+        xIsNext: !this.state.xIsNext
+      });
+    }
+  }, {
+    key: "renderSquare",
+    value: function renderSquare(i) {
+      var _this2 = this;
+
+      return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Square, {
+        value: this.state.squares[i],
+        onClick: function onClick() {
+          return _this2.handleClick(i);
+        }
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+      return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "status"
+      }, status), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "board-row"
+      }, this.renderSquare(0), this.renderSquare(1), this.renderSquare(2)), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "board-row"
+      }, this.renderSquare(3), this.renderSquare(4), this.renderSquare(5)), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "board-row"
+      }, this.renderSquare(6), this.renderSquare(7), this.renderSquare(8)));
+    }
+  }]);
+
+  return Board;
+}(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+
+var Game = /*#__PURE__*/function (_Component3) {
+  _inherits(Game, _Component3);
+
+  var _super3 = _createSuper(Game);
+
+  function Game() {
+    _classCallCheck(this, Game);
+
+    return _super3.apply(this, arguments);
+  }
+
+  _createClass(Game, [{
+    key: "render",
+    value: function render() {
+      return Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "game"
+      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "game-board"
+      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Board, null)), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        "class": "game-info"
+      }, Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null), Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])("ol", null)));
+    }
+  }]);
+
+  return Game;
+}(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+
+Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["render"])(Object(_toy_react_js__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Game, null), document.getElementById('root')); // class MyComponent extends Component {
+//     constructor(props) { 
+//         super(props)
+//         this.state = {
+//             a: 1,
+//             b: 2
+//         }
+//     }
+//     render() { 
+//         return <div class="my-component">
+//             <h1>my component</h1>
+//             <button onclick={() => { this.setState({ a: this.state.a++ })}}>click</button>
+//             <span>{this.state.a.toString()}</span>
+//             <span>{this.state.b.toString()}</span>
+//         </div>
+//     }
+// }
+// // jsx
+// render(<MyComponent id="app" class="test">
+//     <div>bjyx</div>
+//     <div></div>
+//     <div></div>
+// </MyComponent>, document.getElementById('app'))
 
 /***/ }),
 
@@ -177,8 +288,9 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-// 原生的DOM对象是无论如何都没有办法去appendChild一个component的，
+var RENDER_TO_DOM = Symbol('render to dom'); // 原生的DOM对象是无论如何都没有办法去appendChild一个component的，
 // 所以给原生dom对象封一层wrapper, wrapper具有setAttribute和appendChild方法，同时component也具有setAttribute和appendChild方法
+
 var ElementWrapper = /*#__PURE__*/function () {
   function ElementWrapper(tagName) {
     _classCallCheck(this, ElementWrapper);
@@ -189,39 +301,69 @@ var ElementWrapper = /*#__PURE__*/function () {
   _createClass(ElementWrapper, [{
     key: "setAttribute",
     value: function setAttribute(name, value) {
-      this.root.setAttribute(name, value);
+      if (name.match(/^on([\s\S]+)/)) {
+        // RegExp.$1
+        this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, function (c) {
+          return c.toLocaleLowerCase();
+        }), value);
+      } else {
+        this.root.setAttribute(name, value);
+      }
     }
   }, {
     key: "appendChild",
     value: function appendChild(child) {
-      if (child.root) {
-        this.root.appendChild(child.root);
-      }
+      // if (child.root) { 
+      // this.root.appendChild(child.root)
+      var range = document.createRange();
+      range.setStart(this.root, this.root.childNodes.length);
+      range.setEnd(this.root, this.root.childNodes.length);
+      child[RENDER_TO_DOM](range); // }
+    }
+  }, {
+    key: RENDER_TO_DOM,
+    value: function value(range) {
+      range.deleteContents();
+      range.insertNode(this.root); // 插入到末尾
     }
   }]);
 
   return ElementWrapper;
 }();
 
-var TextWrapper = function TextWrapper(content) {
-  _classCallCheck(this, TextWrapper);
+var TextWrapper = /*#__PURE__*/function () {
+  function TextWrapper(content) {
+    _classCallCheck(this, TextWrapper);
 
-  this.root = document.createTextNode(content);
-};
+    this.root = document.createTextNode(content);
+  }
+
+  _createClass(TextWrapper, [{
+    key: RENDER_TO_DOM,
+    value: function value(range) {
+      range.deleteContents();
+      range.insertNode(this.root); // 插入到末尾
+    }
+  }]);
+
+  return TextWrapper;
+}();
 
 var Component = /*#__PURE__*/function () {
-  function Component() {
+  function Component(props) {
     _classCallCheck(this, Component);
 
     this._root = null;
-    this.props = {};
+    this.props = props;
+    this.attributes = {};
     this.children = [];
+    this._range = null;
   }
 
   _createClass(Component, [{
     key: "setAttribute",
     value: function setAttribute(name, value) {
-      this.props[name] = value; // props还未实现
+      this.attributes[name] = value; // props还未实现
     }
   }, {
     key: "appendChild",
@@ -230,14 +372,47 @@ var Component = /*#__PURE__*/function () {
       this.children.push(child);
     }
   }, {
-    key: "root",
-    get: function get() {
-      if (!this._root) {
-        this._root = this.render().root;
+    key: RENDER_TO_DOM,
+    value: function value(range) {
+      this._range = range;
+      this.render()[RENDER_TO_DOM](range);
+    }
+  }, {
+    key: "rerender",
+    value: function rerender() {
+      this._range.deleteContents();
+
+      this[RENDER_TO_DOM](this._range);
+    }
+  }, {
+    key: "setState",
+    value: function setState(newState) {
+      if (this.state === null || _typeof(this.state) !== 'object') {
+        this.state = newState;
+        this.rerender();
+        return;
       }
 
-      return this._root;
-    }
+      var merge = function merge(oldState, newState) {
+        for (var p in newState) {
+          if (oldState[p] === null || _typeof(oldState) !== 'object') {
+            oldState[p] = newState[p];
+          } else {
+            merge(oldState[p], newState[p]);
+          }
+        }
+      };
+
+      merge(this.state, newState);
+      this.rerender();
+    } // 第1课
+    // get root() { 
+    //     if (!this._root) { 
+    //         this._root = this.render().root
+    //     }
+    //     return this._root
+    // }
+
   }]);
 
   return Component;
@@ -313,7 +488,13 @@ function createElement(type, attributes) {
 }
 
 function render(component, mountEle) {
-  mountEle.appendChild(component.root);
+  // 第1课
+  // mountEle.appendChild(component.root)
+  var range = document.createRange();
+  range.setStart(mountEle, 0);
+  range.setEnd(mountEle, mountEle.childNodes.length);
+  range.deleteContents();
+  component[RENDER_TO_DOM](range);
 }
 
 
