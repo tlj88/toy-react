@@ -350,6 +350,20 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -358,90 +372,23 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var RENDER_TO_DOM = Symbol('render to dom'); // 原生的DOM对象是无论如何都没有办法去appendChild一个component的，
-// 所以给原生dom对象封一层wrapper, wrapper具有setAttribute和appendChild方法，同时component也具有setAttribute和appendChild方法
-
-var ElementWrapper = /*#__PURE__*/function () {
-  function ElementWrapper(tagName) {
-    _classCallCheck(this, ElementWrapper);
-
-    this.root = document.createElement(tagName);
-  }
-
-  _createClass(ElementWrapper, [{
-    key: "setAttribute",
-    value: function setAttribute(name, value) {
-      if (name.match(/^on([\s\S]+)/)) {
-        // RegExp.$1
-        this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, function (c) {
-          return c.toLocaleLowerCase();
-        }), value);
-      } else {
-        if (name === 'className') {
-          name = 'class';
-        }
-
-        this.root.setAttribute(name, value);
-      }
-    }
-  }, {
-    key: "appendChild",
-    value: function appendChild(child) {
-      // if (child.root) { 
-      // this.root.appendChild(child.root)
-      if (child) {
-        var range = document.createRange();
-        range.setStart(this.root, this.root.childNodes.length);
-        range.setEnd(this.root, this.root.childNodes.length);
-        console.log('child', child);
-        child[RENDER_TO_DOM](range);
-      } // }
-
-    }
-  }, {
-    key: RENDER_TO_DOM,
-    value: function value(range) {
-      range.deleteContents();
-      range.insertNode(this.root); // 插入到末尾
-    }
-  }]);
-
-  return ElementWrapper;
-}();
-
-var TextWrapper = /*#__PURE__*/function () {
-  function TextWrapper(content) {
-    _classCallCheck(this, TextWrapper);
-
-    this.root = document.createTextNode(content);
-  }
-
-  _createClass(TextWrapper, [{
-    key: RENDER_TO_DOM,
-    value: function value(range) {
-      range.deleteContents();
-      range.insertNode(this.root); // 插入到末尾
-    }
-  }]);
-
-  return TextWrapper;
-}();
+var RENDER_TO_DOM = Symbol('render to dom');
 
 var Component = /*#__PURE__*/function () {
   function Component(props) {
     _classCallCheck(this, Component);
 
-    this._root = null;
-    this.props = props;
-    this.attributes = {};
+    this.props = Object.create(null);
     this.children = [];
+    this._root = null;
     this._range = null;
   }
 
   _createClass(Component, [{
     key: "setAttribute",
     value: function setAttribute(name, value) {
-      this.attributes[name] = value; // props还未实现
+      // this.attributes[name] = value    // props还未实现
+      this.props[name] = value;
     }
   }, {
     key: "appendChild",
@@ -453,25 +400,92 @@ var Component = /*#__PURE__*/function () {
     key: RENDER_TO_DOM,
     value: function value(range) {
       this._range = range;
-      this.render()[RENDER_TO_DOM](range);
+      this._vdom = this.vdom;
+
+      this._vdom[RENDER_TO_DOM](range);
     }
   }, {
-    key: "rerender",
-    value: function rerender() {
-      var oldRange = this._range;
-      var range = document.createRange();
-      range.setStart(oldRange.startContainer, oldRange.startOffset);
-      range.setEnd(oldRange.startContainer, oldRange.startOffset);
-      this[RENDER_TO_DOM](range);
-      oldRange.setStart(range.endContainer, range.endOffset);
-      oldRange.deleteContents();
-    }
+    key: "update",
+    value: function update() {
+      var isSameNode = function isSameNode(oldNode, newNode) {
+        if (oldNode.type !== newNode.type) {
+          return false;
+        }
+
+        for (var name in newNode.props) {
+          if (newNode.props[name] !== oldNode.props[name]) {
+            return false;
+          }
+        }
+
+        if (Object.keys(oldNode.props).length !== Object.keys(newNode.props).length) {
+          return false;
+        }
+
+        if (newNode.type == '#text') {
+          if (newNode.content !== oldNode.content) {
+            return false;
+          }
+        }
+
+        return true;
+      };
+
+      var update = function update(oldNode, newNode) {
+        // type, props, children
+        // #text content
+        if (!isSameNode(oldNode, newNode)) {
+          // 这边体现range的优势，可以非常方便的更新range的内容
+          newNode[RENDER_TO_DOM](oldNode._range);
+          return;
+        }
+
+        newNode._range = oldNode._range;
+        var newChildren = newNode.vchildren;
+        var oldChildren = oldNode.vchildren;
+
+        for (var i = 0; i < newChildren.length; i++) {
+          var newChild = newChildren[i];
+          var oldChild = oldChildren[i];
+
+          if (!newChildren || !newChildren.length) {
+            return;
+          }
+
+          var tailRange = oldChildren[oldChildren.length - 1]._range;
+
+          if (i < oldChildren.length) {
+            update(oldChild, newChild);
+          } else {
+            var range = document.createRange();
+            range.setStart(tailRange.endContainer, tailRange.endOffset);
+            range.setEnd(tailRange.endContainer, tailRange.endOffset);
+            newChild[RENDER_TO_DOM](range);
+            tailRange = range;
+          }
+        }
+      };
+
+      var vdom = this.vdom;
+      update(this._vdom, vdom);
+      this._vdom = vdom;
+    } // rerender() {
+    // let oldRange = this._range 
+    // let range = document.createRange()
+    // range.setStart(oldRange.startContainer, oldRange.startOffset)
+    // range.setEnd(oldRange.startContainer, oldRange.startOffset)
+    // this[RENDER_TO_DOM](range)
+    // oldRange.setStart(range.endContainer, range.endOffset)
+    // oldRange.deleteContents()
+    // }
+
   }, {
     key: "setState",
     value: function setState(newState) {
       if (this.state === null || _typeof(this.state) !== 'object') {
-        this.state = newState;
-        this.rerender();
+        this.state = newState; // this.rerender()
+
+        this.update();
         return;
       }
 
@@ -485,20 +499,151 @@ var Component = /*#__PURE__*/function () {
         }
       };
 
-      merge(this.state, newState);
-      this.rerender();
-    } // 第1课
-    // get root() { 
-    //     if (!this._root) { 
-    //         this._root = this.render().root
-    //     }
-    //     return this._root
+      merge(this.state, newState); // this.rerender()
+
+      this.update();
+    }
+  }, {
+    key: "vdom",
+    get: function get() {
+      return this.render().vdom;
+    } // get vchildren() { 
+    //     return this.children.map(child => child.vdom)
     // }
 
   }]);
 
   return Component;
 }();
+
+var ElementWrapper = /*#__PURE__*/function (_Component) {
+  _inherits(ElementWrapper, _Component);
+
+  var _super = _createSuper(ElementWrapper);
+
+  function ElementWrapper(type) {
+    var _this;
+
+    _classCallCheck(this, ElementWrapper);
+
+    _this = _super.call(this, type);
+    _this.type = type; // this.root = document.createElement(type)
+
+    return _this;
+  }
+
+  _createClass(ElementWrapper, [{
+    key: RENDER_TO_DOM,
+    value: function value(range) {
+      this._range = range; // range.deleteContents()
+
+      var root = document.createElement(this.type);
+
+      for (var name in this.props) {
+        var value = this.props[name];
+
+        if (name.match(/^on([\s\S]+)/)) {
+          root.addEventListener(RegExp.$1.replace(/^[\s\S]/, function (c) {
+            return c.toLocaleLowerCase();
+          }), value);
+        } else {
+          if (name === 'className') {
+            name = 'class';
+          }
+
+          root.setAttribute(name, value);
+        }
+      }
+
+      if (!this.vchildren) {
+        this.vchildren = this.children.map(function (child) {
+          return child.vdom;
+        });
+      }
+
+      var _iterator = _createForOfIteratorHelper(this.vchildren),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var child = _step.value;
+          var childRange = document.createRange();
+          childRange.setStart(root, root.childNodes.length);
+          childRange.setEnd(root, root.childNodes.length);
+          child[RENDER_TO_DOM](childRange);
+        } // range.insertNode(root)  // 插入到末尾
+
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      replaceContent(range, root);
+    }
+  }, {
+    key: "vdom",
+    get: function get() {
+      this.vchildren = this.children.map(function (child) {
+        return child.vdom;
+      });
+      return this; // return {
+      //     type: this.type,
+      //     props: this.props,
+      //     children: this.children.map(child => child.vdom)
+      // }
+    }
+  }]);
+
+  return ElementWrapper;
+}(Component);
+
+var TextWrapper = /*#__PURE__*/function (_Component2) {
+  _inherits(TextWrapper, _Component2);
+
+  var _super2 = _createSuper(TextWrapper);
+
+  function TextWrapper(content) {
+    var _this2;
+
+    _classCallCheck(this, TextWrapper);
+
+    _this2 = _super2.call(this, content);
+    _this2.type = '#text';
+    _this2.content = content; // this.root = document.createTextNode(content)
+
+    return _this2;
+  }
+
+  _createClass(TextWrapper, [{
+    key: RENDER_TO_DOM,
+    value: function value(range) {
+      this._range = range; // range.deleteContents()
+      // range.insertNode(this.root)  // 插入到末尾
+
+      var root = document.createTextNode(this.content);
+      replaceContent(range, root);
+    }
+  }, {
+    key: "vdom",
+    get: function get() {
+      return this; // return {
+      //     type: '#text',
+      //     content: this.content
+      // }
+    }
+  }]);
+
+  return TextWrapper;
+}(Component);
+
+function replaceContent(range, node) {
+  range.insertNode(node);
+  range.setStartAfter(node);
+  range.deleteContents();
+  range.setStartBefore(node);
+  range.setEndAfter(node);
+}
 
 function insertChild(children, parent) {
   // if (
@@ -516,12 +661,12 @@ function insertChild(children, parent) {
   //     child = new TextWrapper(child)
   // }
   // parent.appendChild(child)
-  var _iterator = _createForOfIteratorHelper(children),
-      _step;
+  var _iterator2 = _createForOfIteratorHelper(children),
+      _step2;
 
   try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var child = _step.value;
+    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+      var child = _step2.value;
 
       if (typeof child === 'string') {
         child = new TextWrapper(child);
@@ -538,9 +683,9 @@ function insertChild(children, parent) {
       }
     }
   } catch (err) {
-    _iterator.e(err);
+    _iterator2.e(err);
   } finally {
-    _iterator.f();
+    _iterator2.f();
   }
 }
 /**

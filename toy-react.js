@@ -1,86 +1,99 @@
 const RENDER_TO_DOM = Symbol('render to dom')
 
-// 原生的DOM对象是无论如何都没有办法去appendChild一个component的，
-// 所以给原生dom对象封一层wrapper, wrapper具有setAttribute和appendChild方法，同时component也具有setAttribute和appendChild方法
-class ElementWrapper { 
-    constructor(tagName) { 
-        this.root = document.createElement(tagName)
-    }
-
-    setAttribute(name, value) { 
-        if (name.match(/^on([\s\S]+)/)) {
-            // RegExp.$1
-            this.root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLocaleLowerCase()), value)
-        } else { 
-            if (name === 'className') {
-                name = 'class'
-            }
-            this.root.setAttribute(name, value)
-        }
-    }
-    appendChild(child) { 
-        // if (child.root) { 
-            // this.root.appendChild(child.root)
-            if (child) {
-                let range = document.createRange()
-                range.setStart(this.root, this.root.childNodes.length)
-                range.setEnd(this.root, this.root.childNodes.length)
-                console.log('child', child)
-                child[RENDER_TO_DOM](range)
-            }
-            
-        // }
-    }
-
-    [RENDER_TO_DOM](range) { 
-        range.deleteContents()
-        range.insertNode(this.root)  // 插入到末尾
-    }
-}
-
-class TextWrapper { 
-    constructor(content) { 
-        this.root = document.createTextNode(content)
-    }
-    [RENDER_TO_DOM](range) { 
-        range.deleteContents()
-        range.insertNode(this.root)  // 插入到末尾
-    }
-}
-
 class Component { 
     constructor(props) { 
-        this._root = null
-        this.props = props
-        this.attributes = {}
+        this.props = Object.create(null)
         this.children = []
+        this._root = null
         this._range = null
     }
     setAttribute(name, value) { 
-        this.attributes[name] = value    // props还未实现
+        // this.attributes[name] = value    // props还未实现
+        this.props[name] = value
     }
     appendChild(child) {    // component 添加 
         this.children.push(child)
     }
     [RENDER_TO_DOM](range) { 
         this._range = range
-        this.render()[RENDER_TO_DOM](range)
+        this._vdom = this.vdom
+        this._vdom[RENDER_TO_DOM](range)
     }
-    rerender() {
-        let oldRange = this._range 
 
-        let range = document.createRange()
-        range.setStart(oldRange.startContainer, oldRange.startOffset)
-        range.setEnd(oldRange.startContainer, oldRange.startOffset)
-        this[RENDER_TO_DOM](range)
+    update() { 
+        let isSameNode = (oldNode, newNode) => { 
+            if (oldNode.type !== newNode.type) { 
+                return false
+            }
+            for (let name in newNode.props) { 
+                if (newNode.props[name] !== oldNode.props[name]) { 
+                    return false
+                }
+            }
+            if (Object.keys(oldNode.props).length !== Object.keys(newNode.props).length) { 
+                return false
+            }
+            if (newNode.type == '#text') { 
+                if (newNode.content !== oldNode.content) { 
+                    return false
+                }
+            }
+            return true
+        }
+        let update = (oldNode, newNode) => { 
+            // type, props, children
+            // #text content
 
-        oldRange.setStart(range.endContainer, range.endOffset)
-        oldRange.deleteContents()
+            if (!isSameNode(oldNode, newNode)) { 
+                // 这边体现range的优势，可以非常方便的更新range的内容
+                newNode[RENDER_TO_DOM](oldNode._range)   
+                return
+            }
+            newNode._range = oldNode._range
+
+            let newChildren = newNode.vchildren
+            let oldChildren = oldNode.vchildren
+            for (let i = 0; i < newChildren.length; i++) {
+                let newChild = newChildren[i]
+                let oldChild = oldChildren[i]
+
+                if (!newChildren || !newChildren.length) { 
+                    return
+                }
+
+                let tailRange = oldChildren[oldChildren.length - 1]._range
+                if (i < oldChildren.length) {
+                    update(oldChild, newChild)
+                } else { 
+                    let range = document.createRange()
+                    range.setStart(tailRange.endContainer, tailRange.endOffset)
+                    range.setEnd(tailRange.endContainer, tailRange.endOffset)
+                    newChild[RENDER_TO_DOM](range)
+                    tailRange = range
+                }
+            }
+        }
+
+        let vdom = this.vdom
+        update(this._vdom, vdom)
+        this._vdom = vdom
     }
+    // rerender() {
+        // let oldRange = this._range 
+
+        // let range = document.createRange()
+        // range.setStart(oldRange.startContainer, oldRange.startOffset)
+        // range.setEnd(oldRange.startContainer, oldRange.startOffset)
+        // this[RENDER_TO_DOM](range)
+
+        // oldRange.setStart(range.endContainer, range.endOffset)
+        // oldRange.deleteContents()
+    // }
     setState(newState) { 
         if (this.state === null || typeof this.state !== 'object') { 
             this.state = newState
-            this.rerender()
+            // this.rerender()
+            this.update()
             return
         }
         let merge = (oldState, newState) => { 
@@ -93,15 +106,98 @@ class Component {
             }
         }
         merge(this.state, newState)
-        this.rerender()
+        // this.rerender()
+        this.update()
     }
-    // 第1课
-    // get root() { 
-    //     if (!this._root) { 
-    //         this._root = this.render().root
-    //     }
-    //     return this._root
+    get vdom() { 
+        return this.render().vdom
+    }
+    // get vchildren() { 
+    //     return this.children.map(child => child.vdom)
     // }
+}
+
+class ElementWrapper extends Component{ 
+    constructor(type) { 
+        super(type)
+        this.type = type
+        // this.root = document.createElement(type)
+    }
+    
+    [RENDER_TO_DOM](range) {
+        this._range = range
+        // range.deleteContents()
+
+        let root = document.createElement(this.type)
+
+        for (let name in this.props) {
+            let value = this.props[name]
+
+            if (name.match(/^on([\s\S]+)/)) {
+                root.addEventListener(RegExp.$1.replace(/^[\s\S]/, c => c.toLocaleLowerCase()), value)
+            } else {
+                if (name === 'className') {
+                    name = 'class'
+                }
+                root.setAttribute(name, value)
+            }
+        }
+
+        if (!this.vchildren) { 
+            this.vchildren = this.children.map(child => child.vdom)
+        }
+
+        for (let child of this.vchildren) { 
+            let childRange = document.createRange()
+            childRange.setStart(root, root.childNodes.length)
+            childRange.setEnd(root, root.childNodes.length)
+            child[RENDER_TO_DOM](childRange)
+        }
+        // range.insertNode(root)  // 插入到末尾
+        replaceContent(range, root)
+    }
+
+    get vdom() { 
+        this.vchildren = this.children.map(child => child.vdom)
+        return this
+        // return {
+        //     type: this.type,
+        //     props: this.props,
+        //     children: this.children.map(child => child.vdom)
+        // }
+    }
+}
+
+class TextWrapper extends Component { 
+    constructor(content) {
+        super(content)
+        this.type = '#text'
+        this.content = content
+        // this.root = document.createTextNode(content)
+    }
+    [RENDER_TO_DOM](range) { 
+        this._range = range
+        // range.deleteContents()
+        // range.insertNode(this.root)  // 插入到末尾
+        let root = document.createTextNode(this.content)
+        replaceContent(range, root)
+    }
+    get vdom() {
+        return this
+        // return {
+        //     type: '#text',
+        //     content: this.content
+        // }
+    }
+}
+
+function replaceContent(range, node) { 
+    range.insertNode(node)
+    range.setStartAfter(node)
+    range.deleteContents()
+
+    range.setStartBefore(node)
+    range.setEndAfter(node)
 }
 
 function insertChild(children, parent) { 
